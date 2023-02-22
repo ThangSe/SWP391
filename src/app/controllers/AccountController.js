@@ -94,12 +94,16 @@ class AccountController {
             .catch(next)
     }
     //GET
-    getAllResidentAccount(req, res, next) {
-        Account.find({role: "resident"}).populate("user_id")
-            .then(accounts => {
-                res.status(200).json(accounts)
-            })
-            .catch(next)
+    async getAllResidentAccount(req, res) {
+        try {
+            const {page = 1, limit = 10} = req.query
+            let accounts = await Account.find({role: "resident"}).limit(limit * 1).skip((page - 1) * limit).populate("user_id")
+            let count = await Account.find().count()/limit
+            res.status(200).json({count: Math.ceil(count), accounts})
+        } catch (err) {
+            res.status(500).json(err)
+        }
+            
     }
     //GET
     getAllManagerAccount(req, res, next) {
