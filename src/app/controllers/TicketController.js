@@ -147,6 +147,29 @@ class TicketController {
         }
     }
 
+    async getTicketById(req, res) {
+        try {
+             const ticketId = req.params.id
+             const ticket = await Ticket.findById({_id: ticketId})
+             res.status(200).json(ticket)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async getTicketByIdForResident(req, res) {
+        try {
+             const ticketId = req.params.id
+             const token = req.headers.token
+             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+             const sender_id = accountInfo.id
+             const ticket = await Ticket.findOne({_id: ticketId, sender_id: sender_id})
+             res.status(200).json(ticket)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
 
     // async addImageComputerToTicket(req, res) {
     //     try {

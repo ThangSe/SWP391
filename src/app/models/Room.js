@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-
+const mongooseDelete = require('mongoose-delete')
 const Schema = mongoose.Schema
 
 const Room = new Schema({
@@ -15,9 +15,13 @@ const Room = new Schema({
     status: {type: String, required: true, default: 'Còn trống'},
     price: {type: Number, require: true},
     imgURL: {type: Array},
-    acc_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"}
+    resident_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"},
+    //bill_id: [{type: mongoose.Schema.Types.ObjectId, ref: "bill"}]
 }, {
     timestamps: true,
 })
+Room.plugin(mongooseDelete, {
+    deletedAt : true, 
+    overrideMethods: 'all'})
 
 module.exports = mongoose.model('room', Room)
