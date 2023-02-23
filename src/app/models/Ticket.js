@@ -8,12 +8,13 @@ const Ticket = new Schema({
     content: {type: String, required: true},
     type: {type: String, required: true},
     status: {type: String, required: true, default: 'Chờ tiếp nhận'},
+    imgUrls: {type: Array},
     sender_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"},
     manager_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"}
 }, {
     timestamps: true,
 })
-Account.plugin(mongooseDelete, {
+Ticket.plugin(mongooseDelete, {
     deletedAt : true, 
     overrideMethods: 'all'})
 

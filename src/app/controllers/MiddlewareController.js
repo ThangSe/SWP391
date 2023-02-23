@@ -40,7 +40,7 @@ const middlewareController = {
             }
         })
     },
-    verifyTokenCustomer: (req, res, next) => {
+    verifyTokenResident: (req, res, next) => {
         middlewareController.verifyToken(req,res, () => {
             if(req.account.role == "resident") {
                 next()

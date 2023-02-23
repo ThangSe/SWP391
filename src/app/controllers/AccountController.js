@@ -97,7 +97,7 @@ class AccountController {
     async getAllResidentAccount(req, res) {
         try {
             const {page = 1, limit = 10} = req.query
-            let accounts = await Account.find({role: "resident"}).limit(limit * 1).skip((page - 1) * limit).populate("user_id")
+            let accounts = await Account.find({role: "resident", username: {$ne:null}}).limit(limit * 1).skip((page - 1) * limit).populate("user_id")
             let count = await Account.find().count()/limit
             res.status(200).json({count: Math.ceil(count), accounts})
         } catch (err) {
@@ -164,8 +164,9 @@ class AccountController {
             const token = req.headers.token
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const acc_id = accountInfo.id
+            const datas = req.body
             const user = await User.findOne({acc_id: acc_id})
-            await user.updateOne({$set: req.body})
+            await user.updateOne({$set: datas})
             res.status(200).json("Cập nhật trang cá nhân thành công")
         } catch (err) {
             if(err.name === "ValidationError") {
@@ -183,7 +184,7 @@ class AccountController {
             const acc_id = accountInfo.id
             const user = await User.findOne({acc_id:acc_id})
             if(user.imgURL){
-                const filename = user.imgURL.replace("https://computer-services-api.herokuapp.com/account/avatar/","")
+                const filename = user.imgURL.replace("https://aprartment-api.onrender.com/account/avatar/","")
                 const file = await fileFind(filename)
                 if(file){
                     await deletedFile(file)
@@ -229,9 +230,12 @@ class AccountController {
                     }
                     return
                 }
-                const URL = "https://computer-services-api.herokuapp.com/account/avatar/"+req.file.filename
-                await user.updateOne({$set: {imgURL: URL}})
-                res.status(200).json('Upload success') 
+                if(req.file) {
+                    const URL = "https://aprartment-api.onrender.com/account/avatar/"+req.file.filename
+                    await user.updateOne({$set: {imgURL: URL}})
+                    res.status(200).json('Upload success') 
+                }
+                else res.status(400).json('Chưa chọn file')
             })                 
         } catch (err) {
             res.status(500).json(err)

@@ -10,7 +10,8 @@ const Account = new Schema({
     role: {type: String, required: true, default: 'resident'},
     refreshToken: {type: String},
     user_id: {type: mongoose.Schema.Types.ObjectId, ref:"user"},
-    room_id: {type: mongoose.Schema.Types.ObjectId, ref: "room"}
+    room_id: {type: mongoose.Schema.Types.ObjectId, ref: "room"},
+    ticket_id: [{type: mongoose.Schema.Types.ObjectId, ref: "ticket"}]
 }, {
     timestamps: true,
 })
