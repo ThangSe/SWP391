@@ -3,7 +3,7 @@ const middlewareController = require("../app/controllers/MiddlewareController")
 const imgFunc = require("../config/db/upload")
 const router = require("express").Router()
 
-router.post("/new-ticket",middlewareController.verifyToken, ticketController.createTicket, ticketController.addImageComputerToTicket)
+router.post("/new-ticket",middlewareController.verifyToken, ticketController.createTicket)
 router.post("/all-ticket",middlewareController.verifyTokenManager, ticketController.showAllTicket)
 router.get("/image/:filename", imgFunc.getImg)
 module.exports = router
