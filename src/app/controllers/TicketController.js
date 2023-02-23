@@ -86,7 +86,7 @@ class TicketController {
     //     } catch (err) {
     //         res.status(500).json(err)
     //     }
-    }
+    //}
 }
 
 module.exports = new TicketController()
