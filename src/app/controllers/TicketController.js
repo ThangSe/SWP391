@@ -43,6 +43,111 @@ class TicketController {
         }
     }
 
+    async acceptTicket(req, res) {
+        try {
+            const ticket = await Ticket.findById(req.params.id)
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const manager_id = accountInfo.id
+            const feedback = req.body.feedback
+            if(ticket.status == "Chờ tiếp nhận") {
+                await ticket.updateOne({$set: {status: 'Đã tiếp nhận', manager_id: manager_id, feedback: feedback}})
+                res.status(200).json("Tiếp nhận đơn thành công")
+            } else {
+                res.status(400).json("Đơn không ở trạng thái chờ")
+            }      
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async denyTicket(req, res) {
+        try {
+            const ticket = await Ticket.findById(req.params.id)
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const manager_id = accountInfo.id
+            const feedback = req.body.feedback
+            if(ticket.status == "Chờ tiếp nhận") {
+                await ticket.updateOne({$set: {status: 'Đơn bị từ chối', manager_id: manager_id, feedback: feedback}})
+                res.status(200).json("Từ chối đơn thành công")
+            } else {
+                res.status(400).json("Đơn không ở trạng thái chờ")
+            }      
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async cancelTicket(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const sender_id = accountInfo.id
+            const ticket = await Ticket.findOne({$and:[
+                {_id: req.params.id},
+                {sender_id: sender_id}
+            ]})
+            if(ticket.status == "Chờ tiếp nhận" || ticket.status == "Đã tiếp nhận") {
+                await ticket.updateOne({$set: {status: 'Hủy bỏ'}})
+                res.status(200).json("Hủy bỏ đơn thành công")
+            } else {
+                res.status(400).json("Không thể hủy bỏ đơn nữa")
+            }      
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async confirmTicket(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const sender_id = accountInfo.id
+            const ticket = await Ticket.findOne({$and:[
+                {_id: req.params.id},
+                {sender_id: sender_id}
+            ]})
+            const message = req.body.message
+            if(ticket.status == "Chờ tiếp nhận" || ticket.status == "Đã tiếp nhận" && message == "Hủy bỏ") {
+                await ticket.updateOne({$set: {status: 'Hủy bỏ'}})
+                return res.status(200).json("Hủy bỏ đơn thành công")
+            } else if(ticket.status == "Đã tiếp nhận" && message =="Đồng ý") {
+                await ticket.updateOne({$set: {status: 'Đang xử lí'}})
+                return res.status(200).json("Đơn đang được xử lí")
+            } else if(ticket.status == "Đang xử lí" && message =="Đã xử lí") {
+                await ticket.updateOne({$set: {status: 'Đã xử lí'}})
+                return res.status(200).json("Đã được xử lí")
+            } else {
+                return res.status(200).json("Đơn hàng bị hủy bỏ hoặc đã được xử lí")
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async viewOwnedTicketList(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const sender_id = accountInfo.id
+            const {page = 1, limit = 10, sort = 1, status, type} = req.query
+            const filter = {
+                status: status,
+                type: type,
+                sender_id: sender_id
+            }
+            if(!status) filter.status = {$ne:null}
+            if(!type) filter.type = {$ne:null}
+            const tickets = await Ticket.find(filter).sort({_id:sort}).limit(limit * 1).skip((page - 1) * limit)
+            const count = await Ticket.find().count()/limit
+            return res.status(200).json({count: Math.ceil(count), tickets})
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+
     // async addImageComputerToTicket(req, res) {
     //     try {
     //         const upload = multer({
