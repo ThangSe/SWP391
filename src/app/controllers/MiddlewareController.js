@@ -40,6 +40,16 @@ const middlewareController = {
             }
         })
     },
+    verifyTokenStaff: (req, res, next) => {
+        middlewareController.verifyToken(req,res, () => {
+            if(req.account.role == "staff" || req.account.role == "manager") {
+                next()
+            }
+            else {
+                res.status(403).json("Bạn không có quyền truy cập vào trang này")
+            }
+        })
+    },
     verifyTokenResident: (req, res, next) => {
         middlewareController.verifyToken(req,res, () => {
             if(req.account.role == "resident") {

@@ -11,7 +11,8 @@ const Ticket = new Schema({
     feedback: {type: String},
     imgUrls: {type: Array},
     sender_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"},
-    manager_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"}
+    manager_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"},
+    staff_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"}
 }, {
     timestamps: true,
 })

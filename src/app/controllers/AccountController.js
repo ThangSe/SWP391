@@ -113,6 +113,13 @@ class AccountController {
             })
             .catch(next)
     }
+    getAllStaffAccount(req, res, next) {
+        Account.find({role: "staff"}).populate("user_id")
+            .then(accounts => {
+                res.status(200).json(accounts)
+            })
+            .catch(next)
+    }
     //PATCH /change-password change password(customer)
     async updateAccountById(req, res) {
         try {

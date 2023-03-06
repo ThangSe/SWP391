@@ -7,6 +7,7 @@ router.get("/all/lastest-account", middlewareController.verifyTokenManager, acco
 router.get("/all", middlewareController.verifyTokenManager, accountController.getAllAccounts)
 router.get("/all-resident", middlewareController.verifyTokenManager, accountController.getAllResidentAccount)
 router.get("/all-manager", middlewareController.verifyTokenAdmin, accountController.getAllManagerAccount)
+router.get("/all-staff", middlewareController.verifyTokenManager, accountController.getAllStaffAccount)
 router.get("/account-with-detail", middlewareController.verifyTokenManager, accountController.getAllAccountsDetail)
 router.get("/view-profile", middlewareController.verifyToken, accountController.viewOwnedProfile)
 router.patch("/change-password", middlewareController.verifyToken, accountController.updateAccountById)

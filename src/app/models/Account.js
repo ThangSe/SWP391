@@ -11,7 +11,8 @@ const Account = new Schema({
     refreshToken: {type: String},
     user_id: {type: mongoose.Schema.Types.ObjectId, ref:"user"},
     room_id: {type: mongoose.Schema.Types.ObjectId, ref: "room"},
-    ticket_id: [{type: mongoose.Schema.Types.ObjectId, ref: "ticket"}]
+    ticket_id: [{type: mongoose.Schema.Types.ObjectId, ref: "ticket"}],
+    post_id: [{type: mongoose.Schema.Types.ObjectId, ref: "post"}]
 }, {
     timestamps: true,
 })

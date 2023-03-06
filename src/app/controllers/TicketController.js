@@ -30,10 +30,9 @@ class TicketController {
             const saveTicket = await ticket.save()
             await Ticket.findByIdAndUpdate({_id: saveTicket.id}, {$set: {sender_id: sender_id}}, {new: true})
             await Account.findByIdAndUpdate({_id: sender_id}, {$push: {ticket_id: saveTicket.id}})
-            // req.ticket = saveTicket
-            // req.message = "Tạo đơn thành công"
-            // next()
-            res.status(200).json('Tạo đơn thành công')
+            req.ticket = saveTicket
+            req.message = "Tạo đơn thành công"
+            next()
         } catch (err) {
             if(err.name === "ValidationError") {
                 res.status(500).json(Object.values(err.errors).map(val => val.message))
@@ -115,11 +114,32 @@ class TicketController {
             } else if(ticket.status == "Đã tiếp nhận" && message =="Đồng ý") {
                 await ticket.updateOne({$set: {status: 'Đang xử lí'}})
                 return res.status(200).json("Đơn đang được xử lí")
-            } else if(ticket.status == "Đang xử lí" && message =="Đã xử lí") {
-                await ticket.updateOne({$set: {status: 'Đã xử lí'}})
-                return res.status(200).json("Đã được xử lí")
             } else {
-                return res.status(200).json("Đơn hàng bị hủy bỏ hoặc đã được xử lí")
+                return res.status(200).json("Đơn bị hủy bỏ hoặc đã được xử lí")
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async completeTicket(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const staff_id = accountInfo.id
+            const ticket = await Ticket.findOne({$and:[
+                {_id: req.params.id},
+                {staff_id: staff_id}
+            ]})
+            const message = req.body.message
+            if(ticket.status == "Đang xử lí" && message == "Thành công") {
+                await ticket.updateOne({$set: {status: 'Đã được xử lí'}})
+                return res.status(200).json("Hoàn thành đơn")
+            } else if(ticket.status == "Đang xử lí" && message =="Thất bại") {
+                await ticket.updateOne({$set: {status: 'Xử lí thất bại'}})
+                return res.status(200).json("Đơn xử lí thất bại")
+            } else {
+                return res.status(200).json("Đơn ở trạng thái không hợp lệ")
             }
         } catch (err) {
             res.status(500).json(err)
@@ -140,7 +160,7 @@ class TicketController {
             if(!status) filter.status = {$ne:null}
             if(!type) filter.type = {$ne:null}
             const tickets = await Ticket.find(filter).sort({_id:sort}).limit(limit * 1).skip((page - 1) * limit)
-            const count = await Ticket.find().count()/limit
+            const count = await Ticket.find(filter).count()/limit
             return res.status(200).json({count: Math.ceil(count), tickets})
         } catch (err) {
             res.status(500).json(err)
@@ -170,51 +190,56 @@ class TicketController {
         }
     }
 
+    async assignStaffToTicket(req, res) {
+        try {
+            const ticketId = req.params.id
+            const staffId = req.body.staffId
+            await Ticket.findByIdAndUpdate({_id:ticketId}, {$set: {staff_id: staffId}})
+            res.status(200).json("Cử nhân viên thành công")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
 
-    // async addImageComputerToTicket(req, res) {
-    //     try {
-    //         const upload = multer({
-    //             storage,
-    //             limits: {fileSize: 1 * 1024 * 1024 },
-    //             fileFilter: (req, file, cb) => {
-    //                 if(file.originalname.match(/\.(jpg|png|jpeg)$/)){
-    //                     cb(null, true)
-    //                 }else {
-    //                     cb(null, false)
-    //                     const err = new Error('Chỉ nhận định dạng .png, .jpg và .jpeg')
-    //                     err.name = 'ExtensionError'
-    //                     return cb(err)
-    //                 }
-    //             }
-    //         }).array('img', 5)
-    //         upload(req, res, async(err) => {
-    //             if(err instanceof multer.MulterError) {
-    //                 res.status(500).json(`Multer uploading error: ${err.message}`).end()
-    //                 return
-    //             } else if(err) {
-    //                 if(err.name == 'ExtensionError') {
-    //                     res.status(413).json(err.message).end()
-    //                 } else {
-    //                     res.status(500).json(`unknown uploading error: ${err.message}`).end()
-    //                 }
-    //                 return
-    //             }
-    //             const saveTicket = req.ticket
-    //             if(req.files) {
-    //                 const URLs = req.files.map(file => "https://aprartment-api.onrender.com/ticket/image/"+file.filename)
-    //                 await Ticket.findByIdAndUpdate({_id: saveTicket.id},{$set: {imgUrls: []}})
-    //                 await Ticket.findByIdAndUpdate({_id: saveTicket.id},{$push: {imgUrls: {$each: URLs}}})
-
-    //             }
-    //             if(req.message) {
-    //                 res.status(200).json(req.message)   
-    //             }
-    //             else res.status(200).json('Tải ảnh thành công')   
-    //         })
-    //     } catch (err) {
-    //         res.status(500).json(err)
-    //     }
-    //}
+    async addImageToTicket(req, res) {
+        try {
+            const upload = multer({
+                storage,
+                limits: {fileSize: 1 * 1024 * 1024 },
+                fileFilter: (req, file, cb) => {
+                    if(file.originalname.match(/\.(jpg|png|jpeg)$/)){
+                        cb(null, true)
+                    }else {
+                        cb(null, false)
+                        const err = new Error('Chỉ nhận định dạng .png, .jpg và .jpeg')
+                        err.name = 'ExtensionError'
+                        return cb(err)
+                    }
+                }
+            }).array('img', 5)
+            upload(req, res, async(err) => {
+                if(err instanceof multer.MulterError) {
+                    res.status(500).json(`Multer uploading error: ${err.message}`).end()
+                    return
+                } else if(err) {
+                    if(err.name == 'ExtensionError') {
+                        res.status(413).json(err.message).end()
+                    } else {
+                        res.status(500).json(`unknown uploading error: ${err.message}`).end()
+                    }
+                    return
+                }
+                const saveTicket = req.ticket
+                if(req.files) {
+                    const URLs = req.files.map(file => "https://aprartment-api.onrender.com/ticket/image/"+file.filename)
+                    await Ticket.findByIdAndUpdate({_id: saveTicket.id},{$push: {imgUrls: {$each: URLs}}}) 
+                }   
+            })
+            res.status(200).json(req.message)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
 }
 
 module.exports = new TicketController()
