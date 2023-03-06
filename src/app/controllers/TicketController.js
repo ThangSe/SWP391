@@ -21,18 +21,48 @@ class TicketController {
             res.status(500).json(err)
         }
     }
-    async createTicket(req, res, next) {
+    async createTicket(req, res) {
         try {
             const token = req.headers.token
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const sender_id = accountInfo.id
-            const ticket = new Ticket(req.body)
-            const saveTicket = await ticket.save()
-            await Ticket.findByIdAndUpdate({_id: saveTicket.id}, {$set: {sender_id: sender_id}}, {new: true})
-            await Account.findByIdAndUpdate({_id: sender_id}, {$push: {ticket_id: saveTicket.id}})
-            req.ticket = saveTicket
-            req.message = "Tạo đơn thành công"
-            next()
+            const upload = multer({
+                storage,
+                limits: {fileSize: 3 * 1024 * 1024 },
+                fileFilter: (req, file, cb) => {
+                    if(file.originalname.match(/\.(jpg|png|jpeg)$/)){
+                        cb(null, true)
+                    }else {
+                        cb(null, false)
+                        const err = new Error('Chỉ nhận định dạng .png, .jpg và .jpeg')
+                        err.name = 'ExtensionError'
+                        return cb(err)
+                    }
+                }
+            }).array('img', 5)
+            upload(req, res, async(err) => {
+                if(err instanceof multer.MulterError) {
+                    res.status(500).json(`Multer uploading error: ${err.message}`).end()
+                    return
+                } else if(err) {
+                    if(err.name == 'ExtensionError') {
+                        res.status(413).json(err.message).end()
+                    } else {
+                        res.status(500).json(`unknown uploading error: ${err.message}`).end()
+                    }
+                    return
+                }
+                if(req.files.length > 0) {
+                    const data = JSON.parse(req.body.data)
+                    const ticket = new Ticket(data)
+                    const saveTicket = await ticket.save()
+                    const URLs = req.files.map(file => "https://aprartment-api.onrender.com/ticket/image/"+file.filename)
+                    await Ticket.findByIdAndUpdate({_id: saveTicket.id}, {$set: {sender_id: sender_id}, $push: {imgUrls: {$each: URLs}}}, {new: true})
+                    await Account.findByIdAndUpdate({_id: sender_id}, {$push: {ticket_id: saveTicket.id}})
+                    res.status(200).json("Tạo đơn thành công")
+                }   
+                else res.status(400).json('Chưa chọn file')
+            })
         } catch (err) {
             if(err.name === "ValidationError") {
                 res.status(500).json(Object.values(err.errors).map(val => val.message))
@@ -201,45 +231,6 @@ class TicketController {
         }
     }
 
-    async addImageToTicket(req, res) {
-        try {
-            const upload = multer({
-                storage,
-                limits: {fileSize: 1 * 1024 * 1024 },
-                fileFilter: (req, file, cb) => {
-                    if(file.originalname.match(/\.(jpg|png|jpeg)$/)){
-                        cb(null, true)
-                    }else {
-                        cb(null, false)
-                        const err = new Error('Chỉ nhận định dạng .png, .jpg và .jpeg')
-                        err.name = 'ExtensionError'
-                        return cb(err)
-                    }
-                }
-            }).array('img', 5)
-            upload(req, res, async(err) => {
-                if(err instanceof multer.MulterError) {
-                    res.status(500).json(`Multer uploading error: ${err.message}`).end()
-                    return
-                } else if(err) {
-                    if(err.name == 'ExtensionError') {
-                        res.status(413).json(err.message).end()
-                    } else {
-                        res.status(500).json(`unknown uploading error: ${err.message}`).end()
-                    }
-                    return
-                }
-                const saveTicket = req.ticket
-                if(req.files) {
-                    const URLs = req.files.map(file => "https://aprartment-api.onrender.com/ticket/image/"+file.filename)
-                    await Ticket.findByIdAndUpdate({_id: saveTicket.id},{$push: {imgUrls: {$each: URLs}}}) 
-                }   
-            })
-            res.status(200).json(req.message)
-        } catch (err) {
-            res.status(500).json(err)
-        }
-    }
 }
 
 module.exports = new TicketController()

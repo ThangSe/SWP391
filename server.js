@@ -16,7 +16,7 @@ db.connect()
 
 app.use(methodOverride('_method'))
 app.use(bodyParser.json({limit:"50mb"}))
-const whitelist = ['http://localhost:3000', 'https://computer-services.netlify.app', 'https://computer-services-api.herokuapp.com/', 'http://localhost:5000', 'http://localhost:5500']
+const whitelist = ['http://localhost:3000', 'http://localhost:5000', 'http://localhost:5500']
 const corsOptions = {
   credentials: true,
   origin: (origin, callback) => {
@@ -32,7 +32,7 @@ const corsOptions = {
 app.use(cors(corsOptions))
 app.use(cookieParser())
 app.use(morgan('common'))
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }))
 
 const PORT = process.env.PORT || 2000
 

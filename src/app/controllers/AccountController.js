@@ -237,6 +237,7 @@ class AccountController {
                     }
                     return
                 }
+                console.log(req.body)
                 if(req.file) {
                     const URL = "https://aprartment-api.onrender.com/account/avatar/"+req.file.filename
                     await user.updateOne({$set: {imgURL: URL}})

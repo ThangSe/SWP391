@@ -1,9 +1,11 @@
 const ticketController = require("../app/controllers/TicketController")
 const middlewareController = require("../app/controllers/MiddlewareController")
 const imgFunc = require("../config/db/upload")
+const formidableMiddleware = require('express-formidable')
+
 const router = require("express").Router()
 
-router.post("/new-ticket", middlewareController.verifyTokenResident, ticketController.createTicket, ticketController.addImageToTicket)
+router.post("/new-ticket", middlewareController.verifyTokenResident, /*formidableMiddleware(),*/ ticketController.createTicket)
 router.get("/all-ticket", middlewareController.verifyTokenManager, ticketController.showAllTicket)
 router.get("/detail-ticket/:id", middlewareController.verifyTokenManager, ticketController.getTicketById)
 router.get("/detail-owner-ticket/:id", middlewareController.verifyTokenResident, ticketController.getTicketByIdForResident)
