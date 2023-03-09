@@ -2,7 +2,7 @@ const Account = require("../models/Account")
 const Ticket = require("../models/Ticket")
 const Buffer = require('buffer').Buffer
 const multer = require('multer')
-const {storage, fileFind, deletedFile} = require('../../config/db/upload')
+const {storage} = require('../../config/db/upload')
 
 class TicketController {
     async showAllTicket (req, res) {
@@ -186,6 +186,27 @@ class TicketController {
                 status: status,
                 type: type,
                 sender_id: sender_id
+            }
+            if(!status) filter.status = {$ne:null}
+            if(!type) filter.type = {$ne:null}
+            const tickets = await Ticket.find(filter).sort({_id:sort}).limit(limit * 1).skip((page - 1) * limit)
+            const count = await Ticket.find(filter).count()/limit
+            return res.status(200).json({count: Math.ceil(count), tickets})
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async viewAssignedTicketList(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const staff_id = accountInfo.id
+            const {page = 1, limit = 10, sort = 1, status, type} = req.query
+            const filter = {
+                status: status,
+                type: type,
+                staff_id: staff_id
             }
             if(!status) filter.status = {$ne:null}
             if(!type) filter.type = {$ne:null}

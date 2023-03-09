@@ -21,6 +21,7 @@ const User = new Schema({
         relationship: {type: String}
     }],
     imgURL: {type: String},
+    detail: {type: String},
     acc_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"},
 }, {
     timestamps: true,

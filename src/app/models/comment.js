@@ -5,7 +5,7 @@ const Schema = mongoose.Schema
 
 const Comment = new Schema({
     comment_list:[{
-        user_id: {type: mongoose.Schema.Types.ObjectId, ref:"user"},
+        resident_id: {type: mongoose.Schema.Types.ObjectId, ref:"account"},
         content: {type: String},
         like: {type: Number, default: 0}
     }],

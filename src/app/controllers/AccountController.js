@@ -3,6 +3,7 @@ const User = require("../models/User")
 const bcrypt = require("bcrypt")
 const Buffer = require('buffer').Buffer
 const multer = require('multer')
+const _ = require('lodash')
 const {storage, fileFind, deletedFile} = require('../../config/db/upload')
 
 class AccountController {
@@ -113,12 +114,22 @@ class AccountController {
             })
             .catch(next)
     }
-    getAllStaffAccount(req, res, next) {
-        Account.find({role: "staff"}).populate("user_id")
-            .then(accounts => {
-                res.status(200).json(accounts)
-            })
-            .catch(next)
+
+    async getAllStaffAccount(req, res) {
+        try {
+            const accounts = await Account.find({role: "staff"}).populate([{
+                path: 'user_id',
+                model: 'user',
+                select: 'name detail phonenum',
+                match: {
+                    detail: {$eq: req.body.detail}
+                }
+            }])
+            const accountsCompleted = _.reject(accounts, ['user_id', null])
+            res.status(200).json(accountsCompleted)
+        } catch (err) {
+            res.status(500).json(err)
+        }
     }
     //PATCH /change-password change password(customer)
     async updateAccountById(req, res) {

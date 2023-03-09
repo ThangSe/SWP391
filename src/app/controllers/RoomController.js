@@ -1,5 +1,8 @@
 const Account = require("../models/Account")
 const Room = require("../models/Room")
+const Buffer = require('buffer').Buffer
+const multer = require('multer')
+const {storage} = require('../../config/db/upload')
 
 class RoomController {
     async showAllRoom (req, res) {
@@ -31,9 +34,42 @@ class RoomController {
 
     async createRoom(req, res) {
         try {
-            const room = new Room(req.body)
-            const saveRoom = await room.save()
-            res.status(200).json(saveRoom)
+            const upload = multer({
+                storage,
+                limits: {fileSize: 3 * 1024 * 1024 },
+                fileFilter: (req, file, cb) => {
+                    if(file.originalname.match(/\.(jpg|png|jpeg)$/)){
+                        cb(null, true)
+                    }else {
+                        cb(null, false)
+                        const err = new Error('Chỉ nhận định dạng .png, .jpg và .jpeg')
+                        err.name = 'ExtensionError'
+                        return cb(err)
+                    }
+                }
+            }).array('img', 5)
+            upload(req, res, async(err) => {
+                if(err instanceof multer.MulterError) {
+                    res.status(500).json(`Multer uploading error: ${err.message}`).end()
+                    return
+                } else if(err) {
+                    if(err.name == 'ExtensionError') {
+                        res.status(413).json(err.message).end()
+                    } else {
+                        res.status(500).json(`unknown uploading error: ${err.message}`).end()
+                    }
+                    return
+                }
+                if(req.files.length > 0) {
+                    const data = JSON.parse(req.body.data)
+                    const room = new Room(data)
+                    const saveRoom = await room.save()
+                    const URLs = req.files.map(file => "https://aprartment-api.onrender.com/room/image/"+file.filename)
+                    await Room.findByIdAndUpdate({_id: saveRoom.id}, {$push: {imgUrls: {$each: URLs}}}, {new: true})
+                    res.status(200).json("Tạo phòng thành công")
+                }   
+                else res.status(400).json('Chưa chọn file')
+            })
         } catch (err) {
             if(err.name === "ValidationError") {
                 res.status(500).json(Object.values(err.errors).map(val => val.message))
