@@ -3,7 +3,7 @@ const mongooseDelete = require('mongoose-delete')
 const Schema = mongoose.Schema
 
 const Room = new Schema({
-    roomnum: {type: Number, required: true},
+    roomnum: {type: String, required: true},
     type: {type: String, required: true},
     furniture: {
         bedroom: {type: Number, required: true},
@@ -16,7 +16,7 @@ const Room = new Schema({
     price: {type: Number, require: true},
     imgURL: {type: Array},
     resident_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"},
-    //bill_id: [{type: mongoose.Schema.Types.ObjectId, ref: "bill"}]
+    bill_id: [{type: mongoose.Schema.Types.ObjectId, ref: "bill"}]
 }, {
     timestamps: true,
 })
