@@ -135,18 +135,17 @@ class PostController {
                         model: 'user',
                         select: 'name imgURL'
                     }]
-                },
-                {
-                    path: 'author_id',
-                    model: 'account',
-                    select: 'user_id',
-                    populate: [{
-                        path: 'user_id',
-                        model: 'user',
-                        select: 'name imgURL'
-                    }]
-                }
-                ]
+                }]
+            },
+            {
+                path: 'author_id',
+                model: 'account',
+                select: 'user_id',
+                populate: [{
+                    path: 'user_id',
+                    model: 'user',
+                    select: 'name imgURL'
+                }]
             }])
             res.status(200).json(post)
         } catch (err) {
