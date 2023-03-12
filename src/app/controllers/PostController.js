@@ -18,7 +18,7 @@ class PostController{
 
     async getAllPost(req, res) {
         try {
-            const {page = 1, limit = 10, sort = 1, tagId, authorId} = req.query
+            const {page = 1, limit = 10, sort = 1, tagId, authorId, title} = req.query
             const filter = {
                 tag_id: tagId,
                 author_id: authorId,
@@ -121,6 +121,32 @@ class PostController{
         }
     }
 
+    async getPostById(req, res) {
+        try {
+            const post = await Post.findById(req.params.id).populate([{
+                path: 'comment_id',
+                model: 'comment',
+                populate: [{
+                    path: "comment_list.resident_id",
+                    model: 'account',
+                    select: 'username user_id',
+                    populate: [{
+                        path: 'user_id',
+                        model: 'user',
+                        select: 'name imgURL'
+                    }]
+                }]
+            }])
+            res.status(200).json(post)
+        } catch (err) {
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
+        }
+    }
+
     async createComment(req, res) {
         try {
             const token = req.headers.token
@@ -148,13 +174,13 @@ class PostController{
         }        
     }
 
-    async incLike (req, res) {
-        try {
-            commentId = req.body.id
-        } catch (err) {
-            res.status(500).json(err)
-        }
-    }
+    // async incLike (req, res) {
+    //     try {
+    //         commentId = req.body.id
+    //     } catch (err) {
+    //         res.status(500).json(err)
+    //     }
+    // }
 
 }
 
