@@ -22,9 +22,11 @@ class PostController {
             const filter = {
                 tag_id: tagId,
                 author_id: authorId,
+                title: { $regex: title, $options: 'i'}
             }
             if (!tagId) filter.tag_id = { $ne: null }
             if (!authorId) filter.author_id = { $ne: null }
+            if (!title) filter.title = { $ne: null }
             const posts = await Post.find(filter).sort({ _id: sort }).limit(limit * 1).skip((page - 1) * limit)
             const count = await Post.find(filter).count() / limit
             return res.status(200).json({ count: Math.ceil(count), posts })
@@ -125,9 +127,9 @@ class PostController {
         try {
             const post = await Post.findById(req.params.id).populate([{
                 path: 'comment_id',
-                model: 'comment',
+                model: 'comment', 
                 populate: [{
-                    path: "comment_list.resident_id",
+                    path: 'comment_list.resident_id',
                     model: 'account',
                     select: 'username user_id',
                     populate: [{
@@ -135,7 +137,7 @@ class PostController {
                         model: 'user',
                         select: 'name imgURL'
                     }]
-                }]
+                }],
             },
             {
                 path: 'author_id',
@@ -146,7 +148,8 @@ class PostController {
                     model: 'user',
                     select: 'name imgURL'
                 }]
-            }])
+            }
+        ])
             res.status(200).json(post)
         } catch (err) {
             if (err.name === "ValidationError") {

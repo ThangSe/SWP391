@@ -7,7 +7,8 @@ const Comment = new Schema({
     comment_list:[{
         resident_id: {type: mongoose.Schema.Types.ObjectId, ref:"account"},
         content: {type: String},
-        like: {type: Number, default: 0}
+        like: {type: Number, default: 0},
+        commentTime: {type: Date, default: Date.now}
     }],
     post_id: {type: mongoose.Schema.Types.ObjectId, ref: "post"}
 }, {

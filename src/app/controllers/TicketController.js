@@ -7,13 +7,15 @@ const {storage} = require('../../config/db/upload')
 class TicketController {
     async showAllTicket (req, res) {
         try {
-            const {page = 1, limit = 10, sort = 1, status, type} = req.query
+            const {page = 1, limit = 10, sort = 1, status, type, title} = req.query
             const filter = {
                 status: status,
-                type: type
+                type: type,
+                title: { $regex: title, $options: 'i'}
             }
             if(!status) filter.status = {$ne:null}
             if(!type) filter.type = {$ne:null}
+            if(!title) filter.title = {$ne:null}
             const tickets = await Ticket.find(filter).sort({_id:sort}).limit(limit * 1).skip((page - 1) * limit)
             const count = await Ticket.find().count()/limit
             return res.status(200).json({count: Math.ceil(count), tickets})
