@@ -248,6 +248,7 @@ class TicketController {
             const ticketId = req.params.id
             const staffId = req.body.staffId
             await Ticket.findByIdAndUpdate({_id:ticketId}, {$set: {staff_id: staffId}})
+            await Account.findByIdAndUpdate({_id: req.body.staffId}, {$push: { ticket_id: ticketId }})
             res.status(200).json("Cử nhân viên thành công")
         } catch (err) {
             res.status(500).json(err)
