@@ -9,7 +9,6 @@ router.get("/all-ticket", middlewareController.verifyTokenManager, ticketControl
 router.get("/detail-ticket/:id", middlewareController.verifyTokenManager, ticketController.getTicketById)
 router.get("/detail-owner-ticket/:id", middlewareController.verifyTokenResident, ticketController.getTicketByIdForResident)
 router.get("/owned-ticket", middlewareController.verifyTokenResident, ticketController.viewOwnedTicketList)
-router.post("/assign-staff-to-ticket/:id", middlewareController.verifyTokenManager, ticketController.assignStaffToTicket)
 router.post("/accept-ticket/:id", middlewareController.verifyTokenManager, ticketController.acceptTicket)
 router.post("/deny-ticket/:id", middlewareController.verifyTokenManager, ticketController.denyTicket)
 router.post("/cancel-ticket/:id", middlewareController.verifyTokenResident, ticketController.cancelTicket)

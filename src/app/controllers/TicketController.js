@@ -81,8 +81,10 @@ class TicketController {
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const manager_id = accountInfo.id
             const feedback = req.body.feedback
+            const staffId = req.body.staffId         
             if(ticket.status == "Chờ tiếp nhận") {
-                await ticket.updateOne({$set: {status: 'Đã tiếp nhận', manager_id: manager_id, feedback: feedback}})
+                await ticket.updateOne({$set: {status: 'Đã tiếp nhận', manager_id: manager_id, feedback: feedback, staff_id: staffId}})
+                await Account.findByIdAndUpdate({_id: req.body.staffId}, {$push: { ticket_id: ticket.id }})
                 res.status(200).json("Tiếp nhận đơn thành công")
             } else {
                 res.status(400).json("Đơn không ở trạng thái chờ")
@@ -191,7 +193,16 @@ class TicketController {
             }
             if(!status) filter.status = {$ne:null}
             if(!type) filter.type = {$ne:null}
-            const tickets = await Ticket.find(filter).sort({_id:sort}).limit(limit * 1).skip((page - 1) * limit)
+            const tickets = await Ticket.find(filter).sort({_id:sort}).limit(limit * 1).skip((page - 1) * limit).populate([{
+                path: 'staff_id',
+                model: 'account',
+                select: 'user_id',
+                populate: [{
+                    path: 'user_id',
+                    model: 'user',
+                    select: 'name'
+                }]
+            }])
             const count = await Ticket.find(filter).count()/limit
             return res.status(200).json({count: Math.ceil(count), tickets})
         } catch (err) {
@@ -212,7 +223,16 @@ class TicketController {
             }
             if(!status) filter.status = {$ne:null}
             if(!type) filter.type = {$ne:null}
-            const tickets = await Ticket.find(filter).sort({_id:sort}).limit(limit * 1).skip((page - 1) * limit)
+            const tickets = await Ticket.find(filter).sort({_id:sort}).limit(limit * 1).skip((page - 1) * limit).populate([{
+                path: 'sender_id',
+                model: 'account',
+                select: 'username user_id',
+                populate: [{
+                    path: 'user_id',
+                    model: 'user',
+                    select: 'name'
+                }]
+            }])
             const count = await Ticket.find(filter).count()/limit
             return res.status(200).json({count: Math.ceil(count), tickets})
         } catch (err) {
@@ -238,18 +258,6 @@ class TicketController {
              const sender_id = accountInfo.id
              const ticket = await Ticket.findOne({_id: ticketId, sender_id: sender_id})
              res.status(200).json(ticket)
-        } catch (err) {
-            res.status(500).json(err)
-        }
-    }
-
-    async assignStaffToTicket(req, res) {
-        try {
-            const ticketId = req.params.id
-            const staffId = req.body.staffId
-            await Ticket.findByIdAndUpdate({_id:ticketId}, {$set: {staff_id: staffId}})
-            await Account.findByIdAndUpdate({_id: req.body.staffId}, {$push: { ticket_id: ticketId }})
-            res.status(200).json("Cử nhân viên thành công")
         } catch (err) {
             res.status(500).json(err)
         }
