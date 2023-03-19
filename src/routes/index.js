@@ -4,6 +4,7 @@ const accountRouter = require('./account')
 const ticketRouter = require('./ticket')
 const postRouter = require('./post')
 const roomRouter = require('./room')
+const chartRouter = require('./chart')
 
 function route(app) {
     app.use('/auth', authRouter)
@@ -11,6 +12,7 @@ function route(app) {
     app.use('/ticket', ticketRouter)
     app.use('/post', postRouter)
     app.use('/room', roomRouter)
+    app.use('/chart', chartRouter)
     app.use((req, res, next) => {
         res.status(404)
         res.json({

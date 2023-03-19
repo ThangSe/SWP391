@@ -1,5 +1,7 @@
 const Account = require("../models/Account")
 const Ticket = require("../models/Ticket")
+const startOfDay = require('date-fns/startOfDay')
+const endOfDay = require('date-fns/endOfDay') 
 const Buffer = require('buffer').Buffer
 const multer = require('multer')
 const {storage} = require('../../config/db/upload')
@@ -7,17 +9,24 @@ const {storage} = require('../../config/db/upload')
 class TicketController {
     async showAllTicket (req, res) {
         try {
-            const {page = 1, limit = 10, sort = 1, status, type, title} = req.query
+            const {page = 1, limit = 10, sort = 1, status, type, title, createdAt, updatedAt} = req.query
+            var toDay
+            if(createdAt) toDay = new Date(createdAt)
+            if(updatedAt) toDay = new Date(updatedAt)
             const filter = {
                 status: status,
                 type: type,
-                title: { $regex: title, $options: 'i'}
+                title: { $regex: title, $options: 'i'},
+                updatedAt: {$gte: startOfDay(toDay), $lt: endOfDay(toDay)},
+                createdAt: {$gte: startOfDay(toDay), $lt: endOfDay(toDay)}
             }
             if(!status) filter.status = {$ne:null}
             if(!type) filter.type = {$ne:null}
             if(!title) filter.title = {$ne:null}
+            if(!createdAt) filter.createdAt = {$ne:null}
+            if(!updatedAt) filter.updatedAt = {$ne:null}
             const tickets = await Ticket.find(filter).sort({_id:sort}).limit(limit * 1).skip((page - 1) * limit)
-            const count = await Ticket.find().count()/limit
+            const count = await Ticket.find(filter).count()/limit
             return res.status(200).json({count: Math.ceil(count), tickets})
         } catch (err) {
             res.status(500).json(err)
