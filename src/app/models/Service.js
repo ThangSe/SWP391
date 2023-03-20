@@ -3,8 +3,8 @@ const mongooseDelete = require('mongoose-delete')
 
 const Schema = mongoose.Schema
 
-const Bill = new Schema({
-    detail: {type: String},
+const Service = new Schema({
+    Supplier: {type: String},
     dueDate: {type: Date},
     totalPrice: {type: Number},
     status: {type: String, required: true, default: 'Chưa thanh toán'},
@@ -13,8 +13,8 @@ const Bill = new Schema({
 }, {
     timestamps: true,
 })
-Bill.plugin(mongooseDelete, {
+Service.plugin(mongooseDelete, {
     deletedAt : true, 
     overrideMethods: 'all'})
 
-module.exports = mongoose.model('bill', Bill)
+module.exports = mongoose.model('service', Service)

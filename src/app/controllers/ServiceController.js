@@ -1,11 +1,11 @@
 const Account = require("../models/Account")
-const Room = require("../models/Room")
+const Service = require("../models/Service")
 const Buffer = require('buffer').Buffer
 const multer = require('multer')
 const {storage} = require('../../config/db/upload')
 
 class RoomController {
-    async showAllRoom (req, res) {
+    async showAllService (req, res) {
         try {
             const {page = 1, limit = 10, sort = 1, status, type, price, furniture} = req.query
             const token = req.headers.token
@@ -25,14 +25,14 @@ class RoomController {
             if(!price) filter.price = {$ne:null}
             if(!furniture) filter.furniture = {$ne:null}
             const rooms = await Room.find(filter).sort({_id:sort}).limit(limit * 1).skip((page - 1) * limit)
-            const count = await Room.find(filter).count()/limit
+            const count = await Room.find().count()/limit
             return res.status(200).json({count: Math.ceil(count), rooms})
         } catch (err) {
             res.status(500).json(err)
         }
     }
 
-    async createRoom(req, res) {
+    async createService(req, res) {
         try {
             const upload = multer({
                 storage,
@@ -62,12 +62,10 @@ class RoomController {
                 }
                 if(req.files.length > 0) {
                     const data = JSON.parse(req.body.data)
-                    const room = new Room(data)
-                    const saveRoom = await room.save()
+                    const service = new Service(data)
+                    const saveService = await service.save()
                     const URLs = req.files.map(file => "https://aprartment-api.onrender.com/room/image/"+file.filename)
-                    const account = await Account.findOne({username: saveRoom.roomnum})
-                    await account.updateOne({$set: {room_id: saveRoom.id}})
-                    await Room.findByIdAndUpdate({_id: saveRoom.id}, {$set: {resident_id: account.id}, $push: {imgUrls: {$each: URLs}}}, {new: true})
+                    await Service.findByIdAndUpdate({_id: saveService.id}, {$push: {imgUrls: {$each: URLs}}}, {new: true})
                     res.status(200).json("Tạo phòng thành công")
                 }   
                 else res.status(400).json('Chưa chọn file')
