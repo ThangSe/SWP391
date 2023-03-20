@@ -6,6 +6,7 @@ const morgan =require('morgan')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
+const {} = require("./src/app/handler/CronJob")
 
 const route = require('./src/routes')
 const db =require('./src/config/db')
