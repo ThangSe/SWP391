@@ -61,7 +61,7 @@ class RoomController {
                     const service = new Service(data)
                     const saveService = await service.save()
                     const URLs = req.files.map(file => "https://aprartment-api.onrender.com/service/image/"+file.filename)
-                    await Service.findByIdAndUpdate({_id: saveService.id}, {$push: {imgUrls: {$each: URLs}}}, {new: true})
+                    await Service.findByIdAndUpdate({_id: saveService.id}, {$push: {imgURLs: {$each: URLs}}}, {new: true})
                     res.status(200).json("Tạo phòng thành công")
                 }   
                 else res.status(400).json('Chưa chọn file')
@@ -106,9 +106,9 @@ class RoomController {
                 const service = await Service.findById(req.params.id)
                 const data = JSON.parse(req.body.data)
                 if(req.files.length > 0) {
-                    if(service.imgComUrls.length > 0){
-                        for (var i = 0; i<service.imgComUrls.length; i++){
-                            const filename = service.imgComUrls[i].replace("https://aprartment-api.onrender.com/service/image/","")
+                    if(service.imgURLs.length > 0){
+                        for (var i = 0; i<service.imgURLs.length; i++){
+                            const filename = service.imgURLs[i].replace("https://aprartment-api.onrender.com/service/image/","")
                             const file = await fileFind(filename)
                             if(file){
                                 await deletedFile(file)
@@ -117,7 +117,7 @@ class RoomController {
                     }
                     await service.updateOne({$set: data})
                     const URLs = req.files.map(file => "https://aprartment-api.onrender.com/service/image/"+file.filename)
-                    await service.updateOne({$push: {imgUrls: {$each: URLs}}})
+                    await service.updateOne({$push: {imgURLs: {$each: URLs}}})
                     res.status(200).json("Cập nhật thành công")
                 }   
                 else {

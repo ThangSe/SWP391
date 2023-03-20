@@ -109,7 +109,7 @@ class PostController {
                     const URLs = req.files.map(file => "https://aprartment-api.onrender.com/post/image/" + file.filename)
                     await Account.findByIdAndUpdate({ _id: author_id }, { $push: { post_id: savePost.id } })
                     await Tag.findOneAndUpdate({ type: tagName }, { $push: { post_id: savePost.id } })
-                    await Post.findByIdAndUpdate({ _id: savePost.id }, { $push: { imgUrls: { $each: URLs } } }, { new: true })
+                    await Post.findByIdAndUpdate({ _id: savePost.id }, { $push: { imgURLs: { $each: URLs } } }, { new: true })
                     res.status(200).json("Tạo bài đăng thành công")
                 }
                 else res.status(400).json('Chưa chọn file')

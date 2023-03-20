@@ -64,7 +64,7 @@ class RoomController {
                     const URLs = req.files.map(file => "https://aprartment-api.onrender.com/room/image/"+file.filename)
                     const account = await Account.findOne({username: { $regex: saveRoom.roomnum, $options: 'i'}})
                     await account.updateOne({$set: {room_id: saveRoom.id}})
-                    await Room.findByIdAndUpdate({_id: saveRoom.id}, {$set: {resident_id: account.id}, $push: {imgUrls: {$each: URLs}}}, {new: true})
+                    await Room.findByIdAndUpdate({_id: saveRoom.id}, {$set: {resident_id: account.id}, $push: {imgURLs: {$each: URLs}}}, {new: true})
                     res.status(200).json("Tạo phòng thành công")
                 }   
                 else res.status(400).json('Chưa chọn file')

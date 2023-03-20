@@ -7,7 +7,7 @@ const Post = new Schema({
     title: {type: String, required: true},
     content: {type: String, required: true},
     vote: {type: Number},
-    imgUrls: {type: Array},
+    imgURLs: {type: Array},
     author_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"},
     tag_id: {type: mongoose.Schema.Types.ObjectId, ref: "tag"},
     comment_id: {type: mongoose.Schema.Types.ObjectId, ref: "comment"}
