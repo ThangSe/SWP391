@@ -4,6 +4,6 @@ const imgFunc = require("../config/db/upload")
 const router = require("express").Router()
 
 router.get("/all-rooms", middlewareController.verifyTokenManager, roomController.showAllRoom)
-router.post("/new-room", middlewareController.verifyTokenResident, roomController.createRoom)
+router.post("/new-room", middlewareController.verifyTokenManager, roomController.createRoom)
 router.get("/image/:filename", imgFunc.getImg)
 module.exports = router
