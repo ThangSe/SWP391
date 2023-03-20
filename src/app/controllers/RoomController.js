@@ -77,6 +77,65 @@ class RoomController {
             }
         }
     }
+
+    async showDetailRoomById(req, res) {
+        try {
+            const room = Room.findById(req.params.id).populate([
+                {
+                    path: 'bill_id',
+                    model: 'bill',
+                },
+                {
+                    path: 'resident_id',
+                    model: 'account',
+                    select: 'user_id',
+                    populate: [{
+                        path: 'user_id',
+                        model: 'user',
+                        select: 'name email gender address phonenum birth families imgURL'
+                    }]
+                }
+            ])
+            res.status(200).json(room)
+        } catch (err) {
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
+        }
+    }
+
+    async showOwnedDetailRoom(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const resident_id = accountInfo.id
+            const room = Room.findOne({resident_id: resident_id}).populate([
+                {
+                    path: 'bill_id',
+                    model: 'bill',
+                },
+                {
+                    path: 'resident_id',
+                    model: 'account',
+                    select: 'user_id',
+                    populate: [{
+                        path: 'user_id',
+                        model: 'user',
+                        select: 'name email gender address phonenum birth families imgURL'
+                    }]
+                }
+            ])
+            res.status(200).json(room)
+        } catch (err) {
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
+        }
+    }
     // async updateRoomsInfo(req, res) {
     //     try {
             

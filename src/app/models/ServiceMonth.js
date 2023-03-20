@@ -5,9 +5,10 @@ const Schema = mongoose.Schema
 
 const ServiceMonth = new Schema({
     description: {type: String},
-    totalSerPrice: {type: Number},
+    timePerformer: {type: Date},
     bill_id: {type: mongoose.Schema.Types.ObjectId, ref: "bill"},
-    DetailUsed: [{type: mongoose.Schema.Types.ObjectId, ref: "room"}],
+    service_id: {type: mongoose.Schema.Types.ObjectId, ref: "service"},
+    staff_id : {type: mongoose.Schema.Types.ObjectId, ref: "account"}
 }, {
     timestamps: true,
 })

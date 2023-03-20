@@ -14,7 +14,7 @@ const Room = new Schema({
     },
     status: {type: String, required: true, default: 'Còn trống'},
     price: {type: Number, require: true},
-    imgURL: {type: Array},
+    imgURLs: {type: Array},
     resident_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"},
     bill_id: [{type: mongoose.Schema.Types.ObjectId, ref: "bill"}]
 }, {

@@ -4,12 +4,14 @@ const mongooseDelete = require('mongoose-delete')
 const Schema = mongoose.Schema
 
 const Service = new Schema({
-    Supplier: {type: String},
-    dueDate: {type: Date},
-    totalPrice: {type: Number},
-    status: {type: String, required: true, default: 'Chưa thanh toán'},
+    name: {type: String, required: true},
+    supplier: {type: String, required: true},
+    type: {type: String, required: true},
+    price: {type: Number, required: true},
+    detail: {type: String, required: true},
+    status: {type: String, required: true, default: 'Đang hoạt động'},
     room_id: {type: mongoose.Schema.Types.ObjectId, ref: "room"},
-    serviceMonth: {type: mongoose.Schema.Types.ObjectId, ref: "servicemonth"},
+    serviceMonth_id: [{type: mongoose.Schema.Types.ObjectId, ref: "servicemonth"}],
 }, {
     timestamps: true,
 })

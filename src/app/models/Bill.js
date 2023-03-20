@@ -9,7 +9,7 @@ const Bill = new Schema({
     totalPrice: {type: Number},
     status: {type: String, required: true, default: 'Chưa thanh toán'},
     room_id: {type: mongoose.Schema.Types.ObjectId, ref: "room"},
-    serviceMonth: {type: mongoose.Schema.Types.ObjectId, ref: "servicemonth"},
+    serviceMonth: [{type: mongoose.Schema.Types.ObjectId, ref: "servicemonth"}],
 }, {
     timestamps: true,
 })
