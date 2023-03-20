@@ -2,7 +2,7 @@ const Account = require("../models/Account")
 const Room = require("../models/Room")
 const Buffer = require('buffer').Buffer
 const multer = require('multer')
-const {storage} = require('../../config/db/upload')
+const {storage, fileFind, deletedFile} = require('../../config/db/upload')
 
 class RoomController {
     async showAllRoom (req, res) {
@@ -136,13 +136,68 @@ class RoomController {
             }
         }
     }
-    // async updateRoomsInfo(req, res) {
-    //     try {
-            
-    //     } catch (err) {
-            
-    //     }
-    // }
+
+    async updateRoom(req, res) {
+        try {
+            const upload = multer({
+                storage,
+                limits: {fileSize: 3 * 1024 * 1024 },
+                fileFilter: (req, file, cb) => {
+                    if(file.originalname.match(/\.(jpg|png|jpeg)$/)){
+                        cb(null, true)
+                    }else {
+                        cb(null, false)
+                        const err = new Error('Chỉ nhận định dạng .png, .jpg và .jpeg')
+                        err.name = 'ExtensionError'
+                        return cb(err)
+                    }
+                }
+            }).array('img', 5)
+            upload(req, res, async(err) => {
+                if(err instanceof multer.MulterError) {
+                    res.status(500).json(`Multer uploading error: ${err.message}`).end()
+                    return
+                } else if(err) {
+                    if(err.name == 'ExtensionError') {
+                        res.status(413).json(err.message).end()
+                    } else {
+                        res.status(500).json(`unknown uploading error: ${err.message}`).end()
+                    }
+                    return
+                }
+                const room = await Room.findById(req.params.id)
+                const data = JSON.parse(req.body.data)
+                if(room && req.files.length > 0) {
+                    if(room.imgURLs.length > 0){
+                        for (var i = 0; i<room.imgURLs.length; i++){
+                            const filename = room.imgURLs[i].replace("https://aprartment-api.onrender.com/room/image/","")
+                            const file = await fileFind(filename)
+                            if(file){
+                                await deletedFile(file)
+                            }
+                        }        
+                    }
+                    await room.updateOne({$set: data})
+                    await room.updateOne({$set: {imgURLs: []}})
+                    const URLs = req.files.map(file => "https://aprartment-api.onrender.com/room/image/"+file.filename)
+                    await room.updateOne({$push: {imgURLs: {$each: URLs}}})
+                    res.status(200).json("Cập nhật thành công")
+                }   
+                else if(room) {
+                    await room.updateOne({$set: data})
+                    res.status(200).json("Cập nhật thành công")
+                } else {
+                    res.status(400).json("Dịch vụ không tồn tại")
+                }
+            })
+        } catch (err) {
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
+        }
+    }
 }
 
 module.exports = new RoomController()

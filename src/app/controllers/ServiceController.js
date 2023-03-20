@@ -136,13 +136,23 @@ class RoomController {
             }
         }
     }
-    // async updateRoomsInfo(req, res) {
-    //     try {
-            
-    //     } catch (err) {
-            
-    //     }
-    // }
+    
+    async showDetailServiceById(req, res) {
+        try {
+            const service = Service.findById(req.params.id)
+            if(service) {
+                res.status(200).json(service)
+            }
+            else res.status(400).json("Thông tin chi tiết không tồn tại")
+        } catch (err) {
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
+        }
+    }
+
 }
 
 module.exports = new RoomController()

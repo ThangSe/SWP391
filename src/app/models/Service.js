@@ -11,7 +11,6 @@ const Service = new Schema({
     detail: {type: String, required: true},
     status: {type: String, required: true, default: 'Đang hoạt động'},
     imgURLs: {type: Array},
-    room_id: {type: mongoose.Schema.Types.ObjectId, ref: "room"},
     serviceMonth_id: [{type: mongoose.Schema.Types.ObjectId, ref: "servicemonth"}],
 }, {
     timestamps: true,
