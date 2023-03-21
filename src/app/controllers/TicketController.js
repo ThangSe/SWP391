@@ -32,6 +32,7 @@ class TicketController {
             res.status(500).json(err)
         }
     }
+    
     async createTicket(req, res) {
         try {
             const token = req.headers.token
@@ -157,6 +158,12 @@ class TicketController {
             } else if(ticket.status == "Đã tiếp nhận" && message =="Đồng ý") {
                 await ticket.updateOne({$set: {status: 'Đang xử lí'}})
                 return res.status(200).json("Đơn đang được xử lí")
+            } else if(ticket.status == "Đã được xử lí" && message == "Thành công") {
+                await ticket.updateOne({$set: {status: 'Hoàn thành'}})
+                return res.status(200).json("Đơn đã hoàn thành")
+            } else if(ticket.status == "Đã được xử lí" && message == "Thất bại") {
+                await ticket.updateOne({$set: {status: 'Xử lí thất bại'}})
+                return res.status(200).json("Đơn xử lí thất bại")
             } else {
                 return res.status(200).json("Đơn bị hủy bỏ hoặc đã được xử lí")
             }

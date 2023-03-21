@@ -46,7 +46,11 @@ class PostController {
                 author_id: author_id,
             }
             if (!tagId) filter.tag_id = { $ne: null }
-            const posts = await Post.find(filter).sort({ _id: sort }).limit(limit * 1).skip((page - 1) * limit)
+            const posts = await Post.find(filter).sort({ _id: sort }).limit(limit * 1).skip((page - 1) * limit).populate([{
+                path: 'comment_id',
+                model: 'comment',
+                select: 'comment_list'
+            }])
             const count = await Post.find(filter).count() / limit
             return res.status(200).json({ count: Math.ceil(count), posts })
         } catch (err) {
@@ -186,14 +190,6 @@ class PostController {
             res.status(500).json(err)
         }
     }
-
-    // async incLike (req, res) {
-    //     try {
-    //         commentId = req.body.id
-    //     } catch (err) {
-    //         res.status(500).json(err)
-    //     }
-    // }
 
 }
 
