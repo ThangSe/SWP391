@@ -7,5 +7,6 @@ router.get("/all-services", middlewareController.verifyToken, serviceController.
 router.get("/detail-service/:id", middlewareController.verifyToken, serviceController.showDetailServiceById)
 router.post("/new-service", middlewareController.verifyTokenManager, serviceController.createService)
 router.post("/update-service/:id", middlewareController.verifyTokenManager, serviceController.updateService)
+router.post("/add-service-bill/:id", middlewareController.verifyTokenResident, serviceController.addServiceToBill)
 router.get("/image/:filename", imgFunc.getImg)
 module.exports = router

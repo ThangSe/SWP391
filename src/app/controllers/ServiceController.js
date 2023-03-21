@@ -1,7 +1,11 @@
 const Account = require("../models/Account")
 const Service = require("../models/Service")
+const Bill = require("../models/Bill")
+const ServiceMonth = require("../models/ServiceMonth")
 const Buffer = require('buffer').Buffer
 const multer = require('multer')
+const startOfMonth = require('date-fns/startOfMonth')
+const endOfMonth = require('date-fns/endOfMonth')
 const {storage, fileFind, deletedFile} = require('../../config/db/upload')
 
 class RoomController {
@@ -150,6 +154,30 @@ class RoomController {
             } else {
                 res.status(500).json(err)
             }
+        }
+    }
+
+    async addServiceToBill(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const resident_id = accountInfo.id
+            const service = await Service.findById(req.params.id)
+            const resident = await Account.findById(resident_id)
+            const bill = await Bill.findOne({user_id: resident.user_id, createdAt: {$gte: startOfMonth(new Date()), $lte: endOfMonth(new Date())}})
+            const serviceMonth = new ServiceMonth({
+                description: req.body.description,
+                timePerform: new Date(req.body.date),
+            })
+            const saveSM = await serviceMonth.save()
+            if(saveSM) {
+                await ServiceMonth.findByIdAndUpdate({_id: saveSM.id}, {$set: {bill_id: bill.id, service_id: service.id}})
+                await bill.updateOne({$push: {serviceMonth: saveSM.id}, $inc:{totalPrice: service.price}})
+                await service.updateOne({$push: {serviceMonth: saveSM.id}})
+                res.status(200).json("Đăng kí dịch vụ thành công")
+            } else res.status(400).json("Đăng kí thất bại")
+        } catch (err) {
+            res.status(500).json(err)
         }
     }
 
