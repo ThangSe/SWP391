@@ -2,6 +2,7 @@ const Bill = require("../models/Bill")
 const Room = require("../models/Room")
 const cron = require('node-cron')
 const monthlyBill = cron.schedule('20 4 21 * *', async() => {
+    const date = new Date()
     const rooms = await Room.find().select('price').populate([{
         path: 'resident_id',
         model: 'account',
@@ -17,20 +18,22 @@ const monthlyBill = cron.schedule('20 4 21 * *', async() => {
         for(const data of formattedData1) {
             await Room.findByIdAndUpdate({_id: data._id}, { $push: { bill_id: data.bill_id } })
         }
-        console.log("Run at " + new Date())   
-    } else console.log("Not run at " + new Date())   
+        console.log("Run at " + date)   
+    } else console.log("Not run at " + date)   
 },
 {
     scheduled: true,
     timezone: "Asia/Ho_Chi_Minh"
 })
 
-const job2 = cron.schedule('*/2 * * * * *', () => {
-    console.log("2")
+const expBill = cron.schedule('1 0 1 * *', async () => {
+    const date = new Date()
+    await Bill.updateMany({dueDate: {$lt: date}, status: 'Chưa thanh toán'}, {status: 'Quá hạn'})
+    console.log("Cập nhật hóa đơn quá hạn ngày" + date)
 },
 {
-    scheduled: false,
+    scheduled: true,
     timezone: "Asia/Ho_Chi_Minh"
 })
 
-module.exports = {monthlyBill, job2}
+module.exports = {monthlyBill, expBill}

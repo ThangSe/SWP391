@@ -4,7 +4,7 @@ class BillController {
 
     async showAllBill (req, res) {
         try {
-            const {page = 1, limit = 10, sort = -1, status} = req.query
+            const {page = 1, limit = 10, sort = -1, status, roomnum} = req.query
             const filter = {
                 status: status,
             }
@@ -49,7 +49,7 @@ class BillController {
             const bill = await Bill.findById(req.params.id).populate([{
                 path: 'room_id',
                 model: 'room',
-                select: 'roomnum'
+                select: 'roomnum price'
             }, {
                 path: 'serviceMonth',
                 model: 'servicemonth',
@@ -68,7 +68,14 @@ class BillController {
         }
     }
 
-
+    async payBill(req, res) {
+        try {
+            await Bill.findByIdAndUpdate({_id: req.params.id}, {$set: {status: 'Đã thanh toán'}})
+            res.status(200).json("Thanh toán thành công")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
 
 }
 
