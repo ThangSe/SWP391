@@ -22,6 +22,7 @@ const User = new Schema({
     }],
     imgURL: {type: String},
     detail: {type: String},
+    budget: {type: Number, default: 0},
     acc_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"},
 }, {
     timestamps: true,

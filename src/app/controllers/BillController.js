@@ -1,5 +1,6 @@
 const Bill = require("../models/Bill")
 const Account = require("../models/Account")
+const User = require("../models/User")
 class BillController {
 
     async showAllBill (req, res) {
@@ -72,6 +73,53 @@ class BillController {
         try {
             await Bill.findByIdAndUpdate({_id: req.params.id}, {$set: {status: 'Đã thanh toán'}})
             res.status(200).json("Thanh toán thành công")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+    async depositToAccount(req, res) {
+        try {
+            const account = await Account.findById(req.params.id)
+            await User.findOneAndUpdate({acc_id: account.id}, {$inc:{budget: req.body.amount}})
+            res.status(200).json("Nạp tiền thành công")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async withdrawFromAccount(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const resident_id = accountInfo.id
+            const account = await Account.findById(resident_id)
+            const amount = req.body.amount
+            const user = await User.findOne({acc_id: account.id})
+            if(amount <= user.budget) {
+                await user.updateOne({$inc:{budget: -amount}})
+                res.status(200).json("Rút tiền thành công")
+            } else {
+                res.status(200).json("Số dư không đủ")
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async payBillByOwnedSystem(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const resident_id = accountInfo.id
+            const user = await User.findOne({acc_id: resident_id})
+            const bill = await Bill.findById(req.params.id)
+            if(user.budget >= bill.totalPrice && bill.status == "Chưa thanh toán") {
+                await bill.updateOne({$set: {status: 'Đã thanh toán'}})
+                await user.updateOne({$inc:{budget: -bill.totalPrice}})
+                res.status(200).json("Thanh toán thành công")
+            } else {
+                res.status(200).json("Tài khoản không đủ tiền để thanh toán")
+            }
         } catch (err) {
             res.status(500).json(err)
         }
