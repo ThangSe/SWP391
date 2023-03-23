@@ -14,6 +14,7 @@ router.post("/deny-ticket/:id", middlewareController.verifyTokenManager, ticketC
 router.post("/cancel-ticket/:id", middlewareController.verifyTokenResident, ticketController.cancelTicket)
 router.post("/complete-ticket/:id", middlewareController.verifyTokenStaff, ticketController.completeTicket)
 router.post("/confirm-ticket/:id", middlewareController.verifyTokenResident, ticketController.confirmTicket)
+router.post("/assign-staff-to-ticket/:id", middlewareController.verifyTokenManager, ticketController.assignStaffToTicket)
 router.get("/all-assigned-ticket", middlewareController.verifyTokenStaff, ticketController.viewAssignedTicketList)
 router.get("/image/:filename", imgFunc.getImg)
 module.exports = router

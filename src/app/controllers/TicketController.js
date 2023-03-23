@@ -226,6 +226,15 @@ class TicketController {
         }
     }
 
+    async assignStaffToTicket(req, res) {
+        try {
+            await Ticket.findByIdAndUpdate({_id: req.params.id}, {$set: {staff_id: req.body.staffId}})
+            res.status(200).json("Cử nhân viên thành công")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     async viewAssignedTicketList(req, res) {
         try {
             const token = req.headers.token
