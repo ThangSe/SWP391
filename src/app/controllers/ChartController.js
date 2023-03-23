@@ -1,9 +1,8 @@
 const startOfDay = require('date-fns/startOfDay')
 const endOfDay = require('date-fns/endOfDay')   
 const Bill = require('../models/Bill')
-const Room = require('../models/Account')
+const Room = require('../models/Room')
 const Ticket = require('../models/Ticket')
-
 class ChartController {
     async dataForDashboard(req, res) {
         try {
