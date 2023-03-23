@@ -1,14 +1,14 @@
 const Bill = require("../models/Bill")
 const Room = require("../models/Room")
 const cron = require('node-cron')
-const monthlyBill = cron.schedule('20 4 21 * *', async() => {
+const monthlyBill = cron.schedule('1 0 1 * *', async() => {
     const date = new Date()
-    const rooms = await Room.find().select('price').populate([{
+    const rooms = await Room.find({}).select('price').populate([{
         path: 'resident_id',
         model: 'account',
         select: 'user_id',
     }])
-    const count = await Room.find().count()
+    const count = await Room.find({status:{$ne: "Còn trống"}}).count()
     if(rooms) {
         const data = Array.from({ length: count } , () => ({ room_id: '', totalPrice: '', user_id: ''}))
         const formattedData = data.map((item, i) => ({...item, room_id: rooms[i].id, totalPrice: rooms[i].price, user_id: rooms[i].resident_id.user_id}))   

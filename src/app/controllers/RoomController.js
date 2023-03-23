@@ -137,6 +137,25 @@ class RoomController {
         }
     }
 
+    async addAccountToRoom(req, res) {
+        try {
+            const resident = await Account.findOne({username: { $regex: req.body.username, $options: 'i'}})
+            await Room.findByIdAndUpdate({_id: req.params.id}, {$set: {resident_id: resident.id, status: "Đã được thuê"}})
+            res.status(200).json("Thêm thành công")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async removeAccountFromRoom(req, res) {
+        try {
+            await Room.findByIdAndUpdate({_id: req.params.id}, {$unset: {resident_id: 1}, $set: {status: "Còn trống"}})
+            res.status(200).json("Xóa thành công")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     async updateRoom(req, res) {
         try {
             const upload = multer({

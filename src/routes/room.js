@@ -8,5 +8,7 @@ router.get("/detail-room/:id", middlewareController.verifyTokenManager, roomCont
 router.get("/owned-detail-room", middlewareController.verifyToken, roomController.showOwnedDetailRoom)
 router.post("/new-room", middlewareController.verifyTokenManager, roomController.createRoom)
 router.post("/update-room/:id", middlewareController.verifyTokenManager, roomController.updateRoom)
+router.post("/add-account/:id", middlewareController.verifyTokenManager, roomController.addAccountToRoom)
+router.post("/remove-account/:id", middlewareController.verifyTokenManager, roomController.removeAccountFromRoom)
 router.get("/image/:filename", imgFunc.getImg)
 module.exports = router
