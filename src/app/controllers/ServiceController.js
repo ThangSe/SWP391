@@ -172,7 +172,11 @@ class RoomController {
             const saveSM = await serviceMonth.save()
             if(saveSM) {
                 await ServiceMonth.findByIdAndUpdate({_id: saveSM.id}, {$set: {bill_id: bill.id, service_id: service.id}})
-                await bill.updateOne({$push: {serviceMonth: saveSM.id}, $inc:{totalPrice: service.price}})
+                if (bill.status == "Đã thanh toán") {
+                    await bill.updateOne({$push: {serviceMonth: saveSM.id}, $inc:{totalPrice: service.price}, $set: {status: 'Còn nợ'}})
+                } else {
+                    await bill.updateOne({$push: {serviceMonth: saveSM.id}, $inc:{totalPrice: service.price}})
+                }
                 await service.updateOne({$push: {serviceMonth: saveSM.id}})
                 res.status(200).json("Đăng kí dịch vụ thành công")
             } else res.status(400).json("Đăng kí thất bại")

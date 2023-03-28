@@ -8,6 +8,7 @@ const Bill = new Schema({
     detail: {type: String},
     dueDate: {type: Date, default: lastDayOfMonth(new Date())},
     totalPrice: {type: Number},
+    purchase: {type: Number, default: 0},
     status: {type: String, required: true, default: 'Chưa thanh toán'},
     room_id: {type: mongoose.Schema.Types.ObjectId, ref: "room"},
     user_id: {type: mongoose.Schema.Types.ObjectId, ref:"user"},

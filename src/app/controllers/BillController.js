@@ -114,9 +114,15 @@ class BillController {
             const user = await User.findOne({acc_id: resident_id})
             const bill = await Bill.findById(req.params.id)
             if(user.budget >= bill.totalPrice && bill.status == "Chưa thanh toán") {
-                await bill.updateOne({$set: {status: 'Đã thanh toán'}})
+                await bill.updateOne({$set: {status: 'Đã thanh toán', $inc: {purchase: bill.totalPrice}}})
                 await user.updateOne({$inc:{budget: -bill.totalPrice}})
                 res.status(200).json("Thanh toán thành công")
+            } else if(bill.status == "Còn nợ" && bill.totalPrice > bill.purchase) {
+                const purchase = bill.totalPrice - bill.purchase
+                if(user.budget >= purchase) {
+                    await bill.updateOne({$set: {status: 'Đã thanh toán', $inc: {purchase: purchase}}})
+                    await user.updateOne({$inc:{budget: -purchase}})
+                } else res.status(200).json("Tài khoản không đủ tiền để thanh toán")
             } else {
                 res.status(200).json("Tài khoản không đủ tiền để thanh toán")
             }
