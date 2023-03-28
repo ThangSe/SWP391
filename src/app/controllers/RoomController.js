@@ -141,6 +141,7 @@ class RoomController {
     async addAccountToRoom(req, res) {
         try {
             const resident = await Account.findOne({username: { $regex: req.body.username, $options: 'i'}})
+            await resident.updateOne({status: 'active'})
             await Room.findByIdAndUpdate({_id: req.params.id}, {$set: {resident_id: resident.id, status: "Đã được thuê"}})
             res.status(200).json("Thêm thành công")
         } catch (err) {
@@ -152,7 +153,7 @@ class RoomController {
         try {
             const user = new User()
             const saveUser = await user.save()
-            await Account.findOneAndUpdate({room_id: req.params.id}, {$set: {user_id: saveUser.id}})
+            await Account.findOneAndUpdate({room_id: req.params.id}, {$set: {user_id: saveUser.id, status: 'deactive'}})
             await Room.findByIdAndUpdate({_id: req.params.id}, {$unset: {resident_id: 1}, $set: {status: "Còn trống", }})
             res.status(200).json("Xóa thành công")
         } catch (err) {

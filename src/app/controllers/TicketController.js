@@ -141,7 +141,7 @@ class TicketController {
             res.status(500).json(err)
         }
     }
-
+inc
     async confirmTicket(req, res) {
         try {
             const token = req.headers.token
