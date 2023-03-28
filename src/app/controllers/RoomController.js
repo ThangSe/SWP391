@@ -1,5 +1,6 @@
 const Account = require("../models/Account")
 const Room = require("../models/Room")
+const User = require("../models/User")
 const Buffer = require('buffer').Buffer
 const multer = require('multer')
 const {storage, fileFind, deletedFile} = require('../../config/db/upload')
@@ -149,7 +150,10 @@ class RoomController {
 
     async removeAccountFromRoom(req, res) {
         try {
-            await Room.findByIdAndUpdate({_id: req.params.id}, {$unset: {resident_id: 1}, $set: {status: "Còn trống"}})
+            const user = new User()
+            const saveUser = await user.save()
+            await Account.findOneAndUpdate({room_id: req.params.id}, {$set: {user_id: saveUser.id}})
+            await Room.findByIdAndUpdate({_id: req.params.id}, {$unset: {resident_id: 1}, $set: {status: "Còn trống", }})
             res.status(200).json("Xóa thành công")
         } catch (err) {
             res.status(500).json(err)

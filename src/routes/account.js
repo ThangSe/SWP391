@@ -12,6 +12,7 @@ router.get("/account-with-detail", middlewareController.verifyTokenManager, acco
 router.get("/view-profile", middlewareController.verifyToken, accountController.viewOwnedProfile)
 router.patch("/change-password", middlewareController.verifyToken, accountController.updateAccountById)
 router.patch("/editprofile", middlewareController.verifyToken, accountController.updateProfileAccount)
+router.post("/reset-password/:id", middlewareController.verifyTokenManager, accountController.resetAccountPassword)
 router.post("/register-manager", accountController.registerAccountManager)
 router.post("/editimgprofile",middlewareController.verifyToken,accountController.deleteImgProfileAccount, accountController.updateImgProfileAccount)
 router.get("/avatar/:filename", imgFunc.getImg)

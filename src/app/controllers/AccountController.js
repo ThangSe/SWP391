@@ -164,6 +164,21 @@ class AccountController {
             }
         }
     }
+
+    async resetAccountPassword(req, res) {
+        try {
+            const account = await Account.findById(req.params.id)
+            const hashed = await bcrypt.hash("123456", 10)
+            await account.updateOne({$set: {"password": hashed}})
+            res.status(200).json("Cài lại mật khẩu thành công")
+        } catch (err) {
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
+        }
+    }
     //GET /account/view-profile (customer)
     async viewOwnedProfile(req, res) {
         try {
@@ -260,6 +275,8 @@ class AccountController {
             res.status(500).json(err)
         }
     }
+
+    
 }
 
 module.exports = new AccountController()
