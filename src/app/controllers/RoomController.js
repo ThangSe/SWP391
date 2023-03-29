@@ -112,7 +112,7 @@ class RoomController {
             const token = req.headers.token
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const resident_id = accountInfo.id
-            const room = Room.findOne({resident_id: resident_id}).populate([
+            const room = await Room.findOne({resident_id: resident_id}).populate([
                 {
                     path: 'bill_id',
                     model: 'bill',

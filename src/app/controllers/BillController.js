@@ -54,7 +54,7 @@ class BillController {
             }, {
                 path: 'serviceMonth',
                 model: 'servicemonth',
-                select: 'description timePerform service_id',
+                select: 'description timePerform price service_id',
                 populate: [{
                     path: 'service_id',
                     model: 'service',
