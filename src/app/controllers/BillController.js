@@ -120,7 +120,7 @@ class BillController {
             } else if(bill.status == "Còn nợ" && bill.totalPrice > bill.purchase) {
                 const purchase = bill.totalPrice - bill.purchase
                 if(user.budget >= purchase) {
-                    await bill.updateOne({$set: {status: 'Đã thanh toán'}, , $inc: {purchase: purchase}})
+                    await bill.updateOne({$set: {status: 'Đã thanh toán'}, $inc: {purchase: purchase}})
                     await user.updateOne({$inc:{budget: -purchase}})
                 } else res.status(200).json("Tài khoản không đủ tiền để thanh toán")
             } else {
