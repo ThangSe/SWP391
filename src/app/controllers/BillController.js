@@ -122,6 +122,7 @@ class BillController {
                 if(user.budget >= purchase) {
                     await bill.updateOne({$set: {status: 'Đã thanh toán'}, $inc: {purchase: purchase}})
                     await user.updateOne({$inc:{budget: -purchase}})
+                    res.status(200).json("Thanh toán thành công")
                 } else res.status(200).json("Tài khoản không đủ tiền để thanh toán")
             } else {
                 res.status(200).json("Tài khoản không đủ tiền để thanh toán")
